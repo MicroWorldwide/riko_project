@@ -27,7 +27,12 @@ while True:
 
     ### pass to LLM and get a LLM output.
 
-    llm_output = llm_response(user_spoken_text)
+    try:
+        llm_output = llm_response(user_spoken_text)
+        print(f"Riko: {llm_output}")
+    except Exception as e:
+        print(f"LLM error: {e}")
+    continue
 
     tts_read_text = llm_output
 
@@ -39,13 +44,21 @@ while True:
     output_wav_path = Path("audio") / filename
     output_wav_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # generate audio and save it to client/audio 
-    gen_aud_path = sovits_gen(tts_read_text,output_wav_path)
+    # Generate TTS audio
+    gen_aud_path = sovits_gen(tts_read_text, output_wav_path)
 
+    # Only play if generation succeeded
+    if gen_aud_path and Path(gen_aud_path).exists():
 
-    play_audio(output_wav_path)
-    # clean up audio files
-    [fp.unlink() for fp in Path("audio").glob("*.wav") if fp.is_file()]
+        try:
+            play_audio(gen_aud_path)
+
+        except Exception as e:
+            print(f"Audio playback error: {e}")
+
+    else:
+        print("TTS generation failed.")
+
     # # Example
     # duration = get_wav_duration(output_wav_path)
 
