@@ -9,7 +9,10 @@ from openai import OpenAI
 with open('character_config.yaml', 'r') as f:
     char_config = yaml.safe_load(f)
 
-client = OpenAI(api_key=char_config['OPENAI_API_KEY'])
+client = OpenAI(
+    api_key=char_config['OPENAI_API_KEY'],
+    base_url=char_config['OPENAI_BASE_URL']
+)
 
 # Constants
 HISTORY_FILE = char_config['history_file']
@@ -41,22 +44,22 @@ def save_history(history):
 
 def get_riko_response_no_tool(messages):
 
-    # Call OpenAI with system prompt + history
-    response = client.responses.create(
+    response = client.chat.completions.create(
         model=MODEL,
-        input= messages,
-        temperature=1,
-        top_p=1,
-        max_output_tokens=2048,
-        stream=False,
-        text={
-            "format": {
-            "type": "text"
-            }
-        },
+        messages=messages,
+        temperature=0.8,
     )
 
-    return response
+    assistant_reply = response.choices[0].message.content
+
+    messages.append({
+        "role": "assistant",
+        "content": assistant_reply
+    })
+
+    save_history(messages)
+
+    return assistant_reply
 
 
 def llm_response(user_input):
