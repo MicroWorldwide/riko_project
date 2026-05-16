@@ -1,11 +1,8 @@
 from faster_whisper import WhisperModel
 from process.asr_func.asr_push_to_talk import record_and_transcribe
 from process.llm_funcs.llm_scr import llm_response
-from process.tts_func.sovits_ping import sovits_gen, play_audio
+from process.tts_func.piper_ping import piper_gen, play_audio
 from pathlib import Path
-import os
-import time
-### transcribe audio 
 import uuid
 import soundfile as sf
 
@@ -15,39 +12,70 @@ def get_wav_duration(path):
         return len(f) / f.samplerate
 
 
-print(' \n ========= Starting Chat... ================ \n')
-whisper_model = WhisperModel("base.en", device="cpu", compute_type="float32")
+print("\n ========= Starting Chat... ================ \n")
+
+whisper_model = WhisperModel(
+    "base.en",
+    device="cpu",
+    compute_type="float32"
+)
 
 while True:
 
-    conversation_recording = output_wav_path = Path("audio") / "conversation.wav"
+    # -------------------------
+    # AUDIO INPUT (ASR)
+    # -------------------------
+    conversation_recording = Path("audio") / "conversation.wav"
     conversation_recording.parent.mkdir(parents=True, exist_ok=True)
 
-    user_spoken_text = record_and_transcribe(whisper_model, conversation_recording)
+    user_spoken_text = record_and_transcribe(
+        whisper_model,
+        conversation_recording
+    )
 
-    ### pass to LLM and get a LLM output.
+    if not user_spoken_text.strip():
+        print("No speech detected.")
+        continue
 
+    print(f"You: {user_spoken_text}")
+
+    # -------------------------
+    # LLM RESPONSE
+    # -------------------------
     try:
         llm_output = llm_response(user_spoken_text)
         print(f"Riko: {llm_output}")
+
     except Exception as e:
         print(f"LLM error: {e}")
-    continue
+        continue
 
-    tts_read_text = llm_output
+    # -------------------------
+    # TTS INPUT
+    # -------------------------
+    tts_text = llm_output.strip()
 
-    ### file organization 
+    if not tts_text:
+        print("Empty LLM response, skipping TTS.")
+        continue
 
-    # 1. Generate a unique filename
+    # -------------------------
+    # TTS GENERATION
+    # -------------------------
     uid = uuid.uuid4().hex
-    filename = f"output_{uid}.wav"
-    output_wav_path = Path("audio") / filename
+    output_wav_path = Path("audio") / f"output_{uid}.wav"
     output_wav_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Generate TTS audio
-    gen_aud_path = sovits_gen(tts_read_text, output_wav_path)
+    try:
+        gen_aud_path = piper_gen(tts_text, output_wav_path)
 
-    # Only play if generation succeeded
+    except Exception as e:
+        print(f"TTS error: {e}")
+        continue
+
+    # -------------------------
+    # AUDIO PLAYBACK
+    # -------------------------
     if gen_aud_path and Path(gen_aud_path).exists():
 
         try:
@@ -58,9 +86,3 @@ while True:
 
     else:
         print("TTS generation failed.")
-
-    # # Example
-    # duration = get_wav_duration(output_wav_path)
-
-    # print("waiting for audio to finish...")
-    # time.sleep(duration)

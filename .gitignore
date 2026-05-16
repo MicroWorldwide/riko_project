@@ -1,0 +1,8 @@
+# Ignore audio files
+audio/
+
+# Ignore compiled Python files
+__pycache__
+
+# Ignore chat history
+chat_history.json
