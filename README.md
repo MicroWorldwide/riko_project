@@ -1,6 +1,6 @@
 # Project Riko
 
-Project Riko is a anime focused LLM project by Just Rayen. She listens, and remembers your conversations. It combines OpenAI’s GPT, GPT-SoVITS voice synthesis, and Faster-Whisper ASR into a fully configurable conversational pipeline.
+Project Riko is a anime focused LLM project by Just Rayen. She listens, and remembers your conversations. It combines OpenAI’s GPT, Piper voice synthesis, and Faster-Whisper ASR into a fully configurable conversational pipeline.
 
 **tested with python 3.10 Windows > 10 and Linux Ubuntu**
 
@@ -8,7 +8,7 @@ Project Riko is a anime focused LLM project by Just Rayen. She listens, and reme
 
 - 💬 **LLM-based dialogue** using OpenAI API (configurable system prompts) that connects to LM Studio
 - 🧠 **Conversation memory** to keep context during interactions
-- 🔊 **Voice generation** via GPT-SoVITS API
+- 🔊 **Voice generation** via Piper
 - 🎧 **Speech recognition** using Faster-Whisper
 - 📁 Clean YAML-based config for personality configuration
 
@@ -27,13 +27,6 @@ presets:
       You are a helpful assistant named Riko.
       You speak like a snarky anime girl.
       Always refer to the user as "senpai".
-
-sovits_ping_config:
-  text_lang: en
-  prompt_lang: en
-  ref_audio_path: D:\PyProjects\waifu_project\riko_project\character_files\main_sample.wav
-  prompt_text: This is a sample voice for you to just get started with because it sounds kind of cute but just make sure this doesn't have long silences.
-
 ````
 
 You can define personalities by modiying the config file.
@@ -56,9 +49,7 @@ uv pip install -r requirements.txt
 
 ## 🧪 Usage
 
-### 1. Launch the GPT-SoVITS API 
-
-### 2. Run the main script:
+### 1. Run the main script:
 
 ```bash
 python main_chat.py
@@ -70,7 +61,7 @@ The flow:
 2. Transcribes it with Faster-Whisper
 3. Passes it to GPT (with history)
 4. Generates a response
-5. Synthesizes Riko's voice using GPT-SoVITS
+5. Synthesizes Riko's voice using Piper
 6. Plays the output back to you
 
 ## 📌 TODO / Future Improvements
@@ -82,12 +73,9 @@ The flow:
 
 ## 🧑‍🎤 Credits
 
-* Voice synthesis powered by [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)
 * ASR via [Faster-Whisper](https://github.com/SYSTRAN/faster-whisper)
 * Language model via [OpenAI GPT](https://platform.openai.com)
 
 ## 📜 License
 
 MIT — feel free to clone, modify, and build your own waifu voice companion.
-
-
