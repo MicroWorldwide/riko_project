@@ -1,60 +1,44 @@
-import requests
-### MUST START SERVERS FIRST USING START ALL SERVER SCRIPT
-import time
-import soundfile as sf 
+import soundfile as sf
 import sounddevice as sd
-import yaml
+import piper.voice
+from pathlib import Path
 
-# Load YAML config
-with open('character_config.yaml', 'r') as f:
-    char_config = yaml.safe_load(f)
+# Load model once (important for speed)
+VOICE_PATH = "models/piper/en_US-lessac-medium.onnx"
+
+voice = piper.voice.PiperVoice.load(VOICE_PATH)
 
 
 def play_audio(path):
-    data, samplerate = sf.read(path)
-    sd.play(data, samplerate)
-    sd.wait()  # Wait until playback is finished
+    try:
+        data, samplerate = sf.read(path)
+        sd.play(data, samplerate)
+        sd.wait()
+    except Exception as e:
+        print(f"Playback error: {e}")
 
-def sovits_gen(in_text, output_wav_pth = "output.wav"):
-    url = "http://127.0.0.1:9880/tts"
 
-    payload = {
-        "text": in_text,
-        "text_lang": char_config['sovits_ping_config']['text_lang'],
-        "ref_audio_path": char_config['sovits_ping_config']['ref_audio_path'],  # Make sure this path is valid
-        "prompt_text": char_config['sovits_ping_config']['prompt_text'],
-        "prompt_lang": char_config['sovits_ping_config']['prompt_lang']
-    }
+def sovits_gen(in_text, output_wav_pth="output.wav"):
+    """
+    Drop-in replacement for GPT-SoVITS generator
+    Now uses local Piper TTS
+    """
 
     try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()  # throws if not 200
+        output_wav_pth = Path(output_wav_pth)
 
-        print(response)
-
-        # Save the response audio if it's binary
         with open(output_wav_pth, "wb") as f:
-            f.write(response.content)
-        # print("Audio saved as output.wav")
+            voice.synthesize(in_text, f)
 
-        return output_wav_pth
+        return str(output_wav_pth)
 
     except Exception as e:
-        print("Error in sovits_gen:", e)
+        print(f"TTS error: {e}")
         return None
-
 
 
 if __name__ == "__main__":
 
-    start_time = time.time()
-    output_wav_pth1 = "output.wav"
-    path_to_aud = sovits_gen("if you hear this, that means it is set up correctly", output_wav_pth1)
-    
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-
-    print(f"Elapsed time: {elapsed_time:.4f} seconds")
-    print(path_to_aud)
-
-
+    test = sovits_gen("Hello, this is a local TTS test.")
+    if test:
+        play_audio(test)
