@@ -1,0 +1,16 @@
+name: Riko
+
+active_preset: default
+
+prompts:
+  default:
+    system_prompt_file: ./prompts/riko_default.txt
+
+tts:
+  provider: sovits
+
+  sovits:
+    text_lang: en
+    prompt_lang: en
+    ref_audio_file: ./tts/main_sample.wav
+    prompt_text_file: ./tts/tts_prompt.txt

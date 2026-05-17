@@ -1,0 +1,20 @@
+openai:
+  api_key: lm-studio
+  base_url: http://localhost:1234/v1
+  model: lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF
+
+history:
+  file: chat_history.json
+
+character:
+  active: Riko
+  base_dir: ./character_files/Riko
+
+tts:
+  active_provider: sovits
+
+  providers:
+    sovits:
+      text_lang: en
+      prompt_lang: en
+      endpoint: http://127.0.0.1:9880/tts
